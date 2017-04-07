@@ -1,6 +1,6 @@
 local SL = lord.translate()
 
-tools.sword = {
+tools.register_tool("sword", {
 	get_recipes = function(source)
 		return {{
 			{source},
@@ -127,4 +127,4 @@ tools.sword = {
 		damage_groups = {fleshy=8},
 		groups = {mithril_item = 1},
 	}
-}
+})

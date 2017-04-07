@@ -1,15 +1,21 @@
 tools = {}
--- Load tables
-dofile(minetest.get_modpath(minetest.get_current_modname()) .. "/picks.lua")
-dofile(minetest.get_modpath(minetest.get_current_modname()) .. "/shovels.lua")
-dofile(minetest.get_modpath(minetest.get_current_modname()) .. "/axes.lua")
-dofile(minetest.get_modpath(minetest.get_current_modname()) .. "/swords.lua")
-dofile(minetest.get_modpath(minetest.get_current_modname()) .. "/battleaxes.lua")
-dofile(minetest.get_modpath(minetest.get_current_modname()) .. "/warhammers.lua")
-dofile(minetest.get_modpath(minetest.get_current_modname()) .. "/spears.lua")
-dofile(minetest.get_modpath(minetest.get_current_modname()) .. "/daggers.lua")
-dofile(minetest.get_modpath(minetest.get_current_modname()) .. "/special.lua")
+tools.tool_types = {}
 
+function tools.register_tool(name, tooldef)
+	table.insert(tools.tool_types, name)
+	tools[name] = tooldef
+end
+
+-- Load tables
+lord.do_file("picks.lua")
+lord.do_file("shovels.lua")
+lord.do_file("axes.lua")
+lord.do_file("swords.lua")
+lord.do_file("battleaxes.lua")
+lord.do_file("warhammers.lua")
+lord.do_file("spears.lua")
+lord.do_file("daggers.lua")
+lord.do_file("special.lua")
 
 -- Source materials
 tools.sources = {
@@ -25,23 +31,6 @@ tools.sources = {
 	mithril = "lottores:mithril_ingot",
 }
 
--- A special item - the hand
-minetest.register_item(":", {
-	type = "none",
-	wield_image = "wieldhand.png",
-	wield_scale = {x=1,y=1,z=2.5},
-	tool_capabilities = {
-		full_punch_interval = 0.9,
-		max_drop_level = 0,
-		groupcaps = {
-			crumbly = {times={[2]=3.00, [3]=0.70}, uses=0, maxlevel=1},
-			snappy = {times={[3]=0.40}, uses=0, maxlevel=1},
-			oddly_breakable_by_hand = {times={[1]=3.50,[2]=2.00,[3]=0.70}, uses=0}
-		},
-		damage_groups = {fleshy=1},
-	}
-})
-
 local function get_capability(itemdef, cap)
 	if itemdef[cap] == nil then
 		return nil
@@ -54,12 +43,12 @@ local function get_capability(itemdef, cap)
 	}
 end
 
-local function register_tool(tooltype, material, itemdef)
-	minetest.register_tool("tools:"..tooltype.."_"..material, {
+local function register_tool(tool_type, material, itemdef)
+	minetest.register_tool("tools:"..tool_type.."_"..material, {
 		description = itemdef.description,
-		inventory_image = "tools_"..tooltype.."_"..material..".png"..
+		inventory_image = "tools_"..tool_type.."_"..material..".png"..
 			(itemdef.image_transform or ""),
-		wield_image = "tools_"..tooltype.."_"..material..".png"..
+		wield_image = "tools_"..tool_type.."_"..material..".png"..
 			(itemdef.wield_image_transform or ""),
 		range = itemdef.range,
 		tool_capabilities = {
@@ -77,29 +66,25 @@ local function register_tool(tooltype, material, itemdef)
 	})
 end
 
-local function register_craft(tooltype, material, itemdef)
+local function register_craft(tool_type, material, itemdef)
 	if tools.sources[material] == nil then
 		minetest.log("error", "Cannot find source material for the craft recipe"..
 			" (output='"..material.."')")
 	end
-	for _, r in pairs(tools[tooltype].get_recipes(tools.sources[material])) do
+	for _, r in pairs(tools[tool_type].get_recipes(tools.sources[material])) do
 		minetest.register_craft({
-			output = "tools:"..tooltype.."_"..material,
+			output = "tools:"..tool_type.."_"..material,
 			recipe = r
 		})
 	end
 end
 
-local tooltypes = {
-	"pick", "shovel", "axe", "sword", "battleaxe", "warhammer", "spear", "dagger"
-}
-
-for _, tooltype in ipairs(tooltypes) do
-	for material, _ in pairs(tools[tooltype]) do
-		local itemdef = tools[tooltype][material]
+for _, tool_type in ipairs(tools.tool_types) do
+	for material, _ in pairs(tools[tool_type]) do
+		local itemdef = tools[tool_type][material]
 		if type(itemdef) == "table" then
-			register_tool(tooltype, material, itemdef)
-			register_craft(tooltype, material, itemdef)
+			register_tool(tool_type, material, itemdef)
+			register_craft(tool_type, material, itemdef)
 		end
 	end
 end

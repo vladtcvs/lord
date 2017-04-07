@@ -1,6 +1,6 @@
 local SL = lord.translate()
 
-tools.shovel = {
+tools.register_tool("shovel", {
 	get_recipes = function(source)
 		return {{
 			{source},
@@ -136,4 +136,4 @@ tools.shovel = {
 		damage_groups = {fleshy=4},
 		groups = {mithril_item = 1},
 	}
-}
+})
