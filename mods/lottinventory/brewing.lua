@@ -1,4 +1,4 @@
-local SL = lord.require_intllib()
+local SL = lord.translate()
 
 local get_formspec = function(player,page)
 	if page=="brews" then

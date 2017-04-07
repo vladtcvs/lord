@@ -1,4 +1,4 @@
-local SL = lord.require_intllib()
+local SL = lord.translate()
 
 --Code written by foot_on_teh_hill, with some slight changes.
 --https://github.com/foot-on-teh-hill/cavetools/blob/master/rope.lua

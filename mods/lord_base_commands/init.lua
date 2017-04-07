@@ -1,4 +1,4 @@
-local SL = lord.require_intllib()
+local SL = lord.translate()
 
 local function redefinition(chatcommand, new_description)
 	if minetest.chatcommands[chatcommand] then

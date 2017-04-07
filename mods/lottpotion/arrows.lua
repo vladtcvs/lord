@@ -1,4 +1,4 @@
-local SL = lord.require_intllib()
+local SL = lord.translate()
 
 lottpotion.register_arrow = function(potion_name, name, hname, potion_use_funct, desc, img)
 	minetest.register_craftitem(potion_name.."_arrow", {

@@ -1,4 +1,4 @@
-local SL = lord.require_intllib()
+local SL = lord.translate()
 
 -- Base Ingredients
 minetest.register_node("lottpotion:glass_bottle_mese", {

@@ -5,7 +5,7 @@ farming
 lottores
 lottblocks
 lottmapgen
-lordlib
+core
 building_blocks?
 asphalt?
 streets?

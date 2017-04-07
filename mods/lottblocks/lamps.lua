@@ -1,4 +1,4 @@
-local SL = lord.require_intllib()
+local SL = lord.translate()
 
 minetest.register_alias("lottother:lamp_wood", "lottblocks:lamp_wood")
 minetest.register_alias("lottother:lamp_middle_wood", "lottblocks:lamp_middle_wood")

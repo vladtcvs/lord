@@ -1,4 +1,4 @@
-local SL = lord.require_intllib()
+local SL = lord.translate()
 
 -- This is inspired by the landrush mod by Bremaweb
 

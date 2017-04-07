@@ -1,4 +1,4 @@
-local SL = lord.require_intllib()
+local SL = lord.translate()
 
 minetest.register_tool("lottclothes:cloak_ranger", {
     description = SL("Ranger's Cloak"),

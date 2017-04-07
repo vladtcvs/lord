@@ -2,7 +2,7 @@
 -- See README for more information
 -- Released by Zeg9 under WTFPL
 
-local SL = lord.require_intllib()
+local SL = lord.translate()
 
 zfc = {}
 zfc.users = {}

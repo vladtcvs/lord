@@ -1,4 +1,4 @@
-local SL = lord.require_intllib()
+local SL = lord.translate()
 
 -- basic hobbit outfit.
 -- made from varios flax (multi-color).

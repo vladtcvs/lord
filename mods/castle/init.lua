@@ -1,4 +1,4 @@
-local SL = lord.require_intllib()
+local SL = lord.translate()
 
 dofile(minetest.get_modpath("castle").."/pillars.lua") --колонны
 dofile(minetest.get_modpath("castle").."/arrowslit.lua") --бойницы

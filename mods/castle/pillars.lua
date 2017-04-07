@@ -1,4 +1,4 @@
-local SL = lord.require_intllib()
+local SL = lord.translate()
 
 minetest.register_alias("castle:pillars_bottom", "castle:pillars_stonewall_bottom")
 minetest.register_alias("castle:pillars_top", "castle:pillars_stonewall_top")

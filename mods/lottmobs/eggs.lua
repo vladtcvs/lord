@@ -1,4 +1,4 @@
-local SL = lord.require_intllib()
+local SL = lord.translate()
 
 --mobs:register_egg("lottmobs:dragon_great", "Boss Dragon", "mobs_dragon_egg.png", 1)
 --mobs:register_egg("lottmobs:dragon_great_tame", "Great Dragon", "default_lava_source_animated.png", 1)

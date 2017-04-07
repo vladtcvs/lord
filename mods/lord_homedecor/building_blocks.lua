@@ -1,4 +1,4 @@
-local SL = lord.require_intllib()
+local SL = lord.translate()
 
 minetest.register_node("lord_homedecor:Adobe", {
 	tiles = {"building_blocks_Adobe.png"},

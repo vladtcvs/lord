@@ -3,4 +3,4 @@ fire
 farming
 lottores
 lottother
-lordlib
+core

@@ -1,4 +1,4 @@
-local SL = lord.require_intllib()
+local SL = lord.translate()
 
 local old_is_protected = minetest.is_protected
 function minetest.is_protected(pos, name)

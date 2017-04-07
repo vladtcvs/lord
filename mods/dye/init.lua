@@ -1,4 +1,4 @@
-local SL = lord.require_intllib()
+local SL = lord.translate()
 
 -- Other mods can use these for looping through available colors
 dye = {}

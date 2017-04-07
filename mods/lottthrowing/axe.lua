@@ -1,4 +1,4 @@
-local SL = lord.require_intllib()
+local SL = lord.translate()
 
 local creative = minetest.setting_getbool("creative_mode")
 

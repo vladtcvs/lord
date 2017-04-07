@@ -1,4 +1,4 @@
-local SL = lord.require_intllib()
+local SL = lord.translate()
 
 -- basic outfit from the chetwood forest.
 -- made from green and brown felt & tin ingot.

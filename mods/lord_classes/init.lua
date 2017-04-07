@@ -1,4 +1,4 @@
-local SL = lord.require_intllib()
+local SL = lord.translate()
 
 --[[
   TODO: Move I/O-related functions into a separate mod (lord_util?)

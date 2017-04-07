@@ -1,4 +1,4 @@
-local SL = lord.require_intllib()
+local SL = lord.translate()
 -- minetest/wool/init.lua
 
 -- Backwards compatibility with jordach's 16-color wool mod

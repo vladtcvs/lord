@@ -1,4 +1,4 @@
-local SL = lord.require_intllib()
+local SL = lord.translate()
 
 -- используемые файлы в каталоге мира
 local info_file = minetest.get_worldpath() .. "/info.txt"

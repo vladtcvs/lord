@@ -1,4 +1,4 @@
-local SL = lord.require_intllib()
+local SL = lord.translate()
 
 lottmobs:register_horse("lottmobs:boar_mount", {
 	description = SL("Boar"),

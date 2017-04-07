@@ -1,4 +1,4 @@
-local SL = lord.require_intllib()
+local SL = lord.translate()
 
 local player_in_bed = 0
 local is_sp = minetest.is_singleplayer()

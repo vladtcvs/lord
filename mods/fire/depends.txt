@@ -1,2 +1,2 @@
-lordlib
+core
 lord_homedecor

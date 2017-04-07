@@ -1,4 +1,4 @@
-local SL = lord.require_intllib()
+local SL = lord.translate()
 
 minetest.register_privilege("delprotect", SL("Ignore player protection"))
 

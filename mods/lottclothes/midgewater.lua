@@ -1,4 +1,4 @@
-local SL = lord.require_intllib()
+local SL = lord.translate()
 
 -- the simplest outfit available.
 -- made from green felt & wood (just cut down the nearest tree).

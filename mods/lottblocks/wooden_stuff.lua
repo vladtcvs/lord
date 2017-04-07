@@ -1,4 +1,4 @@
-local SL = lord.require_intllib()
+local SL = lord.translate()
 
 function lottblocks.register_wooden_stuff(name, description, texture, wood_name)
     local node_groups = {}

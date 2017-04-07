@@ -1,4 +1,4 @@
-local SL = lord.require_intllib()
+local SL = lord.translate()
 
 tools.pick = {
 	get_recipes = function(source)

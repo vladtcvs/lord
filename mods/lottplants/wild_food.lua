@@ -1,4 +1,4 @@
-local SL = lord.require_intllib()
+local SL = lord.translate()
 
 -- The wild plants drop food that can be eaten or crafted to get seeds
 

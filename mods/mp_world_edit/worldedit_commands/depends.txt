@@ -1,2 +1,2 @@
 worldedit
-lordlib
+core

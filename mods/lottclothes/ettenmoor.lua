@@ -1,4 +1,4 @@
-local SL = lord.require_intllib()
+local SL = lord.translate()
 
 -- outfit from the ettenmoor region. wizard style (as possible).
 -- made from grey and brown felt & gold ingot. 

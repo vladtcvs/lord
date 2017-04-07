@@ -1,4 +1,4 @@
 default
-lordlib
+core
 screwdriver?
 keyword_interact?

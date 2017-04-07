@@ -1,4 +1,4 @@
-local SL = lord.require_intllib()
+local SL = lord.translate()
 
 dofile(minetest.get_modpath(minetest.get_current_modname()).."/zcg.lua")
 dofile(minetest.get_modpath(minetest.get_current_modname()).."/cooking.lua")

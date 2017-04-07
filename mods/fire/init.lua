@@ -1,4 +1,4 @@
-local SL = lord.require_intllib()
+local SL = lord.translate()
 
 -- minetest/fire/init.lua
 dofile(minetest.get_modpath("fire").."/campfire.lua")

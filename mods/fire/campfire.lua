@@ -17,7 +17,7 @@ Version: 0.1.3
 - You can craft and use better campfire.
 ]]--
 
-local SL = lord.require_intllib()
+local SL = lord.translate()
 
 -- VARIABLES
 campfire = {}

@@ -1,4 +1,4 @@
-local SL = lord.require_intllib()
+local SL = lord.translate()
 
 arrows = {
 	{"lottthrowing:arrow", "lottthrowing:arrow_entity"},

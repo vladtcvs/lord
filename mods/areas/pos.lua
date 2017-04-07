@@ -1,4 +1,4 @@
-local SL = lord.require_intllib()
+local SL = lord.translate()
 
 -- I could depend on WorldEdit for this, but you need to have the 'worldedit'
 -- permission to use those commands and you don't have

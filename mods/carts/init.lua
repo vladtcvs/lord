@@ -1,4 +1,4 @@
-local SL = lord.require_intllib()
+local SL = lord.translate()
 
 local CART_ACCELERATION = "0.5"
 local CART_MAX_VELOCITY = 10

@@ -1,4 +1,4 @@
-local SL = lord.require_intllib()
+local SL = lord.translate()
 
 dofile(minetest.get_modpath("lottplants").."/nodes.lua")
 dofile(minetest.get_modpath("lottplants").."/wild_food.lua")

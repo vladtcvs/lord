@@ -1,4 +1,4 @@
-local SL = lord.require_intllib()
+local SL = lord.translate()
 
 minetest.register_privilege("worldedit", SL("Can use WorldEdit commands"))
 

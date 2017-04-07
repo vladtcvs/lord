@@ -1,4 +1,4 @@
-local SL = lord.require_intllib()
+local SL = lord.translate()
 
 --Modified from builtin/game/chatcommands.lua to hide privs starting with GAME
 

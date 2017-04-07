@@ -4,7 +4,7 @@
 --Version	2.2
 --License	WTFPL
 
-local SL = lord.require_intllib()
+local SL = lord.translate()
 
 --VARIABLES
   local bees = {}

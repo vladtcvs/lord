@@ -1,4 +1,4 @@
-local SL = lord.require_intllib()
+local SL = lord.translate()
 
 -- fancy shaped bed
 beds.register_bed("beds:fancy_bed", {

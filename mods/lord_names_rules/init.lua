@@ -1,4 +1,4 @@
-local SL = lord.require_intllib()
+local SL = lord.translate()
 
 -- правила формирования имени
 local rules = {
@@ -24,7 +24,7 @@ local rules = {
 		match = function(name)
 			return string.match(name, "^[A-Z]")
 		end,
-		description = SL("Your name must begin with capital letters;"),
+		description = SL("Your name must begin with a capital letter;"),
 	},
 }
 
@@ -58,7 +58,7 @@ end)
 minetest.register_on_joinplayer(function(player)
 	local name = player:get_player_name()
 	if not minetest.is_singleplayer() and not is_correct_name(name) then -- ошибка в имени
-		minetest.chat_send_player(name, SL("Invalid character name. Contact to the administration."))
+		minetest.chat_send_player(name, SL("Invalid character name. Please contact the administration."))
 	end
 end)
 

@@ -1,4 +1,4 @@
-local SL = lord.require_intllib()
+local SL = lord.translate()
 
 minetest.register_tool("lottblocks:lockpick", {
     description = SL("Lockpick"),
