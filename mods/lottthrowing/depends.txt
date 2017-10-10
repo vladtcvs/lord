@@ -4,3 +4,6 @@ farming
 lottores
 lottother
 lordlib
+throwing
+arrows
+lottmobs

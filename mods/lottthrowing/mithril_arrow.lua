@@ -1,9 +1,5 @@
 local SL = lord.require_intllib()
 
-minetest.register_craftitem("lottthrowing:arrow_mithril", {
-	description = SL("Mithril Arrow"),
-	inventory_image = "lottthrowing_arrow_mithril.png",
-})
 
 minetest.register_node("lottthrowing:arrow_mithril_box", {
 	drawtype = "nodebox",
@@ -80,9 +76,4 @@ end
 
 minetest.register_entity("lottthrowing:arrow_mithril_entity", THROWING_ARROW_ENTITY)
 
-minetest.register_craft({
-	output = 'lottthrowing:arrow_mithril 16',
-	recipe = {
-		{'default:stick', 'default:stick', 'lottores:mithril_ingot'},
-	}
-})
+

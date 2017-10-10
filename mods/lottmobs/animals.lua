@@ -1,6 +1,6 @@
 local SL = lord.require_intllib()
 
-mobs:register_arrow("lottmobs:egg_entity", {
+throwing:register_arrow("lottmobs:egg_entity", {
 	visual = "sprite",
 	visual_size = {x=.5, y=.5},
 	textures = {"lottmobs_egg.png"},
