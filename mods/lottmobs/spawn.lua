@@ -79,6 +79,9 @@ mobs:spawn_specific("lottmobs:orc_archer", {"default:snowblock"},       {"air"},
 mobs:spawn_specific("lottmobs:orc_archer", {"default:dirt_with_snow"},  {"air"}, -1, 15, 30, 12000, 2, 0, 31000)
 mobs:spawn_specific("lottmobs:orc_archer", {"lottmapgen:angsnowblock"}, {"air"}, -1, 20, 30, 9000,  2, 0, 31000)
 
+mobs:spawn_specific("lottmobs:orc",        {"default:stone"}, {"air"}, -1, 5, 30, 800,   2, -3000, 10)
+mobs:spawn_specific("lottmobs:orc_archer", {"default:stone"}, {"air"}, -1, 5, 30, 800,   2, -3000, 10)
+
 mobs:spawn_specific("lottmobs:raiding_orc", {"lottmapgen:ithilien_grass"}, {"air"}, -1, 2, 30, 6000, 3, 0, 31000)
 mobs:spawn_specific("lottmobs:raiding_orc", {"lottmapgen:rohan_grass"},    {"air"}, -1, 2, 30, 6000, 3, 0, 31000)
 mobs:spawn_specific("lottmobs:raiding_orc", {"lottmapgen:gondor_grass"},   {"air"}, -1, 2, 30, 6000, 3, 0, 31000)
