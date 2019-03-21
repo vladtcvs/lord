@@ -1,8 +1,33 @@
 
 -- Mobs Api (26th March 2017)
 
+minetest.request_insecure_environment()
+require('torch')
+require('cltorch')
+require('nn')
+
 mobs = {}
 mobs.mod = "redo"
+
+mobs.maph = 0 -- see only the same layer
+mobs.mapw = 5 -- 11x11 map
+mobs.cw = 5
+mobs.ch = 5
+mobs.mw = 2*mobs.mapw + 1
+mobs.mh = 2*mobs.maph + 1
+
+local build_nn = function()
+	local sw = mobs.mw - mobs.cw + 1
+	mobs.nn = nn.Sequential() -- 3 @ 11x11
+	mobs.nn:add(nn.SpatialConvolution(3, 6, mobs.cw, mobs.cw)) -- 6 @ 7x7
+	mobs.nn:add(nn.ReLU()) -- 6 @ 7x7
+	mobs.nn:add(nn.View(6*sw*sw)) -- 6*7*7
+	mobs.nn:add(nn.Linear(6*sw*sw, 6)) -- go x+, x-, z+, z-, run, attack
+	mobs.nn:add(nn.ReLU()) -- go x+, x-, z+, z-, run, attack
+	minetest.log("Loading nn: "..tostring(mobs.nn))
+end
+
+build_nn()
 
 -- Intllib
 local S
@@ -19,7 +44,6 @@ else
 end
 
 mobs.intllib = S
-
 
 -- Invisibility mod check
 mobs.invis = {}
@@ -2214,15 +2238,10 @@ local mob_activate = function(self, staticdata, def)
 	update_tag(self)
 end
 
-
--- main mob function
-local mob_step = function(self, dtime)
-
-	local pos = self.object:getpos()
-	local yaw = 0
-
-	-- when lifetimer expires remove mob (except npc and tamed)
-	if self.type ~= "npc"
+local die = function (self, dtime)
+	return false
+end
+--[[	if self.type ~= "npc"
 	and not self.tamed
 	and self.state ~= "attack"
 	and remove_far ~= true
@@ -2234,6 +2253,7 @@ local mob_step = function(self, dtime)
 
 			-- only despawn away from player
 			local objs = minetest.get_objects_inside_radius(pos, 15)
+			--local objs = {}
 
 			for n = 1, #objs do
 
@@ -2241,7 +2261,7 @@ local mob_step = function(self, dtime)
 
 					self.lifetimer = 20
 
-					return
+					return false
 				end
 			end
 
@@ -2252,8 +2272,125 @@ local mob_step = function(self, dtime)
 
 			self.object:remove()
 
-			return
+			return true
 		end
+	end
+	return false
+end]]--
+
+local build_map = function(self, pos, owntype)
+	local map = {}
+
+	pos.x = math.floor(pos.x + 0.49)
+	pos.y = math.floor(pos.y + 0.49)
+	pos.z = math.floor(pos.z + 0.49)
+
+	for y = pos.y-mobs.maph, pos.y+mobs.maph do
+		map[y] = {}
+		for x = pos.x-mobs.mapw, pos.x+mobs.mapw do
+			map[y][x] = {}
+			for z = pos.z-mobs.mapw, pos.z+mobs.mapw do
+				local node = minetest.get_node({x=x, y=y, z=z})
+				local walkable = minetest.registered_nodes[node.name].walkable
+				if walkable then
+					walkable = 1
+				else
+					walkable = 0
+				end
+				map[y][x][z] = {
+					walkable = walkable,
+					enemy = 0,
+					friend = 0,
+				}
+			end
+		end
+	end
+
+	local r = math.sqrt(mobs.mapw*mobs.mapw + mobs.maph*mobs.maph)
+	local objs = minetest.get_objects_inside_radius(pos, r)
+	for _, obj in pairs(objs) do
+		if obj ~= self.object then
+			local opos = obj:getpos()
+			local x = math.floor(opos.x+0.49)
+			local y = math.floor(opos.y+0.49)
+			local z = math.floor(opos.z+0.49)
+
+			if obj:is_player() then
+				y = y + 1
+			end
+
+			minetest.log("x: "..x.." y: "..y.." z:"..z)
+			minetest.log("posx: "..pos.x.." posy: "..pos.y.." posz:"..pos.z)
+
+			if x >= pos.x - mobs.mapw and x <= pos.x + mobs.mapw and
+				y >= pos.y - mobs.maph and y <= pos.y + mobs.maph and
+				z >= pos.z - mobs.mapw and z <= pos.z + mobs.mapw then
+
+				minetest.log("Obj = "..tostring(obj))
+				if obj:is_player() then
+					if owntype == "monster" then
+						map[y][x][z].enemy  = map[y][x][z].enemy + 1
+					else
+						map[y][x][z].friend = map[y][x][z].friend + 1
+					end
+				else
+					local entity = obj:get_luaentity()
+					local ename = entity.name
+					if ename ~= "__builtin:item"
+						and ename ~= "__builtin:falling_node"
+						and ename ~= "gauges:hp_bar"
+						and ename ~= "signs:text"
+						and ename ~= "itemframes:item" then
+						local type = entity.type
+						if owntype == type then
+							map[y][x][z].friend = map[y][x][z].friend + 1
+						else
+							map[y][x][z].enemy  = map[y][x][z].enemy + 1
+						end
+					end
+				end
+			end
+		end
+	end
+
+	return map
+end
+
+local function ident(i)
+	local s = ''
+	for x=0,i do
+		s = s.."    "
+	end
+	return s
+end
+
+local function dump(o, i)
+	if type(o) == 'table' then
+		local pre = '{\n'
+		local post = ident(i)..'}'
+		local s = ''
+		for k,v in pairs(o) do
+			if type(k) ~= 'number' then
+				k = '"'..k..'"'
+			end
+			local item = ident(i+1)..'['..k..'] = ' .. dump(v, i+2) .. ',\n'
+			s = s..item
+		end
+		return pre..s..post
+	else
+		return tostring(o)
+	end
+end
+
+-- main mob function
+local mob_step = function(self, dtime)
+
+	local pos = self.object:getpos()
+	local yaw = 0
+
+	-- when lifetimer expires remove mob (except npc and tamed)
+	if die(self, dtime) then
+		return
 	end
 
 	falling(self, pos)
@@ -2279,54 +2416,40 @@ local mob_step = function(self, dtime)
 		end
 	end
 
-	-- attack timer
-	self.timer = self.timer + dtime
-
-	if self.state ~= "attack" then
-
-		if self.timer < 1 then
-			return
-		end
-
-		self.timer = 0
-	end
-
-	-- never go over 100
-	if self.timer > 100 then
-		self.timer = 1
-	end
-
 	-- node replace check (cow eats grass etc.)
 	replace(self, pos)
-
-	-- mob plays random sound at times
-	if random(1, 100) == 1 then
-		mob_sound(self, self.sounds.random)
-	end
 
 	-- environmental damage timer (every 1 second)
 	self.env_damage_timer = self.env_damage_timer + dtime
 
-	if (self.state == "attack" and self.env_damage_timer > 1)
-	or self.state ~= "attack" then
-
+	if (self.state == "attack" and self.env_damage_timer > 1) or self.state ~= "attack" then
 		self.env_damage_timer = 0
-
 		do_env_damage(self)
 	end
 
-	monster_attack(self)
+	-- build environment map
+	local px = math.floor(pos.x + 0.49)
+	local py = math.floor(pos.y + 0.49)
+	local pz = math.floor(pos.z + 0.49)
 
-	npc_attack(self)
+	local emap = build_map(self, pos, self.object:get_luaentity().type)
+	local map = torch.Tensor(3, mobs.mw, mobs.mw)
+	minetest.log("Fill map")
+	for i = 1, mobs.mw do
+		for j = 1, mobs.mw do
+			local mi = emap[py][px+i-mobs.mapw-1][pz+j-mobs.mapw-1]
+			--minetest.log("i = "..tostring(i).." j = "..tostring(j))
+			--minetest.log(tostring(mi.walkable))
+			map[1][i][j] = mi.walkable
+			map[2][i][j] = mi.enemy
+			map[3][i][j] = mi.friend
+		end
+	end
+	minetest.log("ready")
+	minetest.log(tostring(map))
 
 	breed(self)
-
 	follow_flop(self)
-
-	do_states(self, dtime)
-
-	do_jump(self)
-
 end
 
 
