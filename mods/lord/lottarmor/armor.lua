@@ -70,47 +70,14 @@ end
 local inv_mod = nil
 local time = 0
 
-gui_bg_img = "background[5,5;1,1;gui_formbg.png;true]"
-gui_slots = "listcolors[#606060AA;#606060;#141318;#30434C;#FFF]"
-
 armor = {
 	player_hp = {},
 	elements = {"head", "torso", "legs", "feet"},
 	physics = {"jump","speed","gravity"},
-	size="size[8,8.5]",
-	inventory_formspec = gui_bg_img
-		..gui_slots
-		.."image[0,0;1,1;lottarmor_helmet.png]"
-		.."image[0,1;1,1;lottarmor_chestplate.png]"
-		.."image[0,2;1,1;lottarmor_leggings.png]"
-		.."image[0,3;1,1;lottarmor_boots.png]"
-		.."image[3,0;1,1;lottarmor_helmet.png]"
-		.."image[3,1;1,1;lottarmor_shirt.png]"
-		.."image[3,2;1,1;lottarmor_trousers.png]"
-		.."image[3,3;1,1;lottarmor_shoes.png]"
-		.."image[4,0;1,1;lottarmor_cloak.png]"
-		.."list[detached:player_name_armor;armor;0,0;1,4;]"
-		.."list[detached:player_name_armor;armor;2,2;1,1;4]"
-		.."list[detached:player_name_clothing;clothing;3,0;1,4;]"
-		.."list[detached:player_name_clothing;clothing;4,0;1,1;4]"
-		.."image[1.16,0.25;2,4;armor_preview]"
-		.."image[2,2;1,1;lottarmor_shield.png]"
-		.."list[current_player;main;0,4.25;8,1;]"
-		.."list[current_player;main;0,5.5;8,3;8]"
-		.."image[5.05,0;3.5,1;lottarmor_crafting.png]"
-		.."list[current_player;craft;4,1;3,3;]"
-		.."list[current_player;craftpreview;7,2;1,1;]"
-		.."listring[current_player;main]"
-		.."listring[current_player;craft]"
-		.."image[7,3;1,1;lottarmor_trash.png]"
-		.."list[detached:armor_trash;main;7,3;1,1;]"
-		.."image_button[7,1;1,1;bags.png;bags;]",
-	textures = {},
 	def = {state=0, count = 0},
 	version = "0.4.4",
+	changed_cbs = {},
 }
-
-
 
 --Trash
 local trash = minetest.create_detached_inventory("armor_trash", {
@@ -123,26 +90,54 @@ local trash = minetest.create_detached_inventory("armor_trash", {
 })
 trash:set_size("main", 1)
 
+armor.register_armor_changed_handler = function(self, handler)
+	table.insert(armor.changed_cbs, handler)
+end
+
+armor.armor_changed = function(self, player)
+	for _, cb in ipairs(armor.changed_cbs) do
+		cb(player)
+	end
+end
+
 armor.update_player_visuals = function(self, player)
 	multiskin:update_player_visuals(player)
 end
 
-armor.set_player_armor = function(self, player)
+armor.build_armor = function(self, player)
+	local armor_texture = "lottarmor_trans.png"
+	local physics_o = {speed=1,gravity=1,jump=1}
+	local result = {
+		texture = armor_texture,
+		armor_level = armor_level,
+		armon_heal = armor_heal,
+		armor_fire = armor_fire,
+		items = items,
+		state = state,
+		name = player:get_player_name(),
+		valid_player = false,
+		physics_o = physics_o,
+	}
+
+	local preview = ""
 	local name, player_inv = armor:get_valid_player(player, "[set_player_armor]")
 	if not name then
-		return
+		return result
 	end
-	local armor_texture = "lottarmor_trans.png"
+
+	local textures = {}
+
 	local armor_level = 0
 	local armor_heal = 0
 	local armor_fire = 0
-	local state = 0
+
 	local items = 0
+	local state = 0
+
 	local elements = {}
-	local textures = {}
-	local physics_o = {speed=1,gravity=1,jump=1}
+
 	local material = {type=nil, count=1}
-	local preview = multiskin:get_preview(name) or "character_preview.png"
+
 	for _,v in ipairs(self.elements) do
 		elements[v] = false
 	end
@@ -193,35 +188,57 @@ armor.set_player_armor = function(self, player)
 	end
 	armor_level = armor_level * ARMOR_LEVEL_MULTIPLIER
 	armor_heal = armor_heal * ARMOR_HEAL_MULTIPLIER
+
 	if #textures > 0 then
 		armor_texture = table.concat(textures, "^")
 	end
+
+	result = {
+		texture = armor_texture,
+		armor_level = armor_level,
+		armon_heal = armor_heal,
+		armor_fire = armor_fire,
+		items = items,
+		state = state,
+		name = name,
+		valid_player = true,
+		physics_o = physics_o,
+	}
+	return result
+end
+
+armor.set_player_armor = function(self, player)
+	local player_armor = armor:build_armor(player)
+
+	if not player_armor.valid_player then
+		return
+	end
+
 	local armor_groups = {fleshy=100}
 	local immortal = player:get_armor_groups().immortal
 	if immortal and immortal ~= 0 then
 		armor_groups.immortal = 1
 	end
-	if armor_level > 0 then
-		armor_groups.level = math.floor(armor_level / 20)
-		armor_groups.fleshy = 100 - armor_level
+	if player_armor.armor_level > 0 then
+		armor_groups.level = math.floor(player_armor.armor_level / 20)
+		armor_groups.fleshy = 100 - player_armor.armor_level
 	end
 	if player:get_meta():get("lott:immunity") ~= nil and (not immortal or immortal == 0) then
 		player:set_armor_groups({fleshy = 1})
 	else
 		player:set_armor_groups(armor_groups)
 	end
-	player:set_physics_override(physics_o)
-	self.textures[name].armor = armor_texture
-	self.textures[name].preview = preview
-	self.def[name].state = state
-	self.def[name].count = items
-	self.def[name].level = armor_level
-	self.def[name].heal = armor_heal
-	self.def[name].jump = physics_o.jump
-	self.def[name].speed = physics_o.speed
-	self.def[name].gravity = physics_o.gravity
-	self.def[name].fire = armor_fire
-	multiskin[name].armor = armor_texture
+	player:set_physics_override(player_armor.physics_o)
+
+	self.def[player_armor.name].state = player_armor.state
+	self.def[player_armor.name].count = player_armor.items
+	self.def[player_armor.name].level = player_armor.armor_level
+	self.def[player_armor.name].heal = player_armor.armor_heal
+	self.def[player_armor.name].jump = player_armor.physics_o.jump
+	self.def[player_armor.name].speed = player_armor.physics_o.speed
+	self.def[player_armor.name].gravity = player_armor.physics_o.gravity
+	self.def[player_armor.name].fire = player_armor.armor_fire
+	--multiskin[player_armor.name].armor = player_armor.texture
 	multiskin:update_player_visuals(player)
 end
 
@@ -291,116 +308,6 @@ armor.update_armor = function(self, player)
 	self.player_hp[name] = hp
 end
 
-armor.get_armor_formspec = function(self, name)
-	if not armor.textures[name] then
-		minetest.log("error", "lottarmor: Player texture["..name.."] is nil [get_armor_formspec]")
-		return ""
-	end
-	if not armor.def[name] then
-		minetest.log("error", "lottarmor: Armor def["..name.."] is nil [get_armor_formspec]")
-		return ""
-	end
-	local formspec = armor.inventory_formspec:gsub("player_name", name)
-	formspec = formspec:gsub("armor_preview", armor.textures[name].preview)
-	formspec = formspec:gsub("armor_level", armor.def[name].level)
-	formspec = formspec:gsub("armor_heal", armor.def[name].heal)
-	formspec = formspec:gsub("armor_fire", armor.def[name].fire)
-	return formspec
-end
-
-sfinv.register_page("inventory:main", {
-	title = SL("Inventory"),
-	mainpage = true,
-	get = function(self, player, context)
-		local name = armor:get_valid_player(player, "[set_player_armor]")
-		if not name then
-			return sfinv.make_formspec(player, context, "", false, armor.size)
-		end
-
-		local content = armor:get_armor_formspec(name)
-		return sfinv.make_formspec(player, context, content, false, armor.size)
-	end,
-	is_in_nav = function(self, player, context)
-		return true
-	end,
-	on_player_receive_fields = function(self, player, context, fields)
-		if fields.bags then
-			sfinv.set_page(player, "inventory:bags")
-		end
-	end,
-})
-
-sfinv.register_page("inventory:bags", {
-	title = SL("Bags"),
-	get = function(self, player, context)
-		local name = player:get_player_name()
-		local content = "list[current_player;main;0,3.5;8,4;]"
-			.."button[0,0;2,0.5;main;"..SL("Back").."]"
-			.."button[0,2;2,0.5;bag1;"..SL("Bag").." 1]"
-			.."button[2,2;2,0.5;bag2;"..SL("Bag").." 2]"
-			.."button[4,2;2,0.5;bag3;"..SL("Bag").." 3]"
-			.."button[6,2;2,0.5;bag4;"..SL("Bag").." 4]"
-			.."list[detached:"..name.."_bags;bag1;0.5,1;1,1;]"
-			.."list[detached:"..name.."_bags;bag2;2.5,1;1,1;]"
-			.."list[detached:"..name.."_bags;bag3;4.5,1;1,1;]"
-			.."list[detached:"..name.."_bags;bag4;6.5,1;1,1;]"
-			.."background[5,5;1,1;gui_formbg.png;true]"
-		return sfinv.make_formspec(player, context, content, false, armor.size)
-	end,
-	is_in_nav = function(self, player, context)
-		return false
-	end,
-	on_player_receive_fields = function(self, player, context, fields)
-		if fields.main then
-			sfinv.set_page(player, "inventory:main")
-			return
-		end
-
-		for i=1,4 do
-			local page = "bag"..i
-			if fields[page] then
-				if not (player:get_inventory():get_stack(page, 1):get_definition().groups.bagslots==nil) then
-					sfinv.set_page(player, "inventory:bag"..i)
-					return
-				end
-			end
-		end
-	end,
-})
-
-for i=1,4 do
-	sfinv.register_page("inventory:bag"..i, {
-		title = SL("Bag"..i),
-		get = function(self, player, context)
-			local image = player:get_inventory():get_stack("bag"..i, 1):get_definition().inventory_image
-			local content = "list[current_player;main;0,4.5;8,4;]"
-				.."button[0,0;2,0.5;main;"..SL("Main").."]"
-				.."button[2,0;2,0.5;bags;"..SL("Bags").."]"
-				.."image[7,0;1,1;"..image.."]"
-				.."list[current_player;bag"..i.."contents;0,1;8,3;]"
-				.."listring[current_player;bag"..i.."contents]"
-				.."listring[current_player;main]"
-				.."background[5,5;1,1;gui_formbg.png;true]"
-			return sfinv.make_formspec(player, context, content, false, armor.size)
-		end,
-		is_in_nav = function(self, player, context)
-			return false
-		end,
-		on_player_receive_fields = function(self, player, context, fields)
-			if fields.main then
-				sfinv.set_page(player, "inventory:main")
-				return
-			end
-
-			if fields.bags then
-				sfinv.set_page(player, "inventory:bags")
-				return
-			end
-		end,
-	})
-end
-
-
 armor.get_valid_player = function(self, player, msg)
 	msg = msg or ""
 	if not player then
@@ -439,13 +346,13 @@ races.register_init_callback(function(name, race, gender, skin, texture, face)
 		on_put = function(inv, listname, index, stack, player)
 			player:get_inventory():set_stack(listname, index, stack)
 			armor:set_player_armor(player)
-			sfinv.invalidate_page(player, "lottarmor:main")
+			armor:armor_changed(player)
 			lottachievements.equip(stack, player, 1)
 		end,
 		on_take = function(inv, listname, index, stack, player)
 			player:get_inventory():set_stack(listname, index, nil)
 			armor:set_player_armor(player)
-			sfinv.invalidate_page(player, "lottarmor:main")
+			armor:armor_changed(player)
 			lottachievements.equip(stack, player, -1)
 		end,
 		on_move = function(inv, from_list, from_index, to_list, to_index, count, player)
@@ -454,7 +361,7 @@ races.register_init_callback(function(name, race, gender, skin, texture, face)
 			p_inv:set_stack(to_list, to_index, stack)
 			p_inv:set_stack(from_list, from_index, nil)
 			armor:set_player_armor(player)
-			sfinv.invalidate_page(player, "lottarmor:main")
+			armor:armor_changed(player)
 		end,
 		allow_put = function(inv, listname, index, stack, player)
 			if index == 1 then
@@ -496,48 +403,12 @@ races.register_init_callback(function(name, race, gender, skin, texture, face)
 			return count
 		end,
 	}, name)
-	if inv_mod == "inventory_plus" then
-		inventory_plus.register_button(joined_player,"armor", "Armor")
-	end
+
 	armor_inv:set_size("armor", 5)
 	player_inv:set_size("armor", 5)
 	for i = 1, 5 do
 		local stack = player_inv:get_stack("armor", i)
 		armor_inv:set_stack("armor", i, stack)
-	end
-
-	--Bags
-	local bags_inv = minetest.create_detached_inventory(name.."_bags",{
-		on_put = function(inv, listname, index, stack, player)
-			player:get_inventory():set_stack(listname, index, stack)
-			player:get_inventory():set_size(listname.."contents", stack:get_definition().groups.bagslots)
-		end,
-		on_take = function(inv, listname, index, stack, player)
-			player:get_inventory():set_stack(listname, index, nil)
-		end,
-		allow_put = function(inv, listname, index, stack, player)
-			if stack:get_definition().groups.bagslots then
-				return 1
-			else
-				return 0
-			end
-		end,
-		allow_take = function(inv, listname, index, stack, player)
-			if player:get_inventory():is_empty(listname.."contents")==true then
-				return stack:get_count()
-			else
-				return 0
-			end
-		end,
-		allow_move = function(inv, from_list, from_index, to_list, to_index, count, player)
-			return 0
-		end,
-	}, name)
-	for i=1,4 do
-		local bag = "bag"..i
-		player_inv:set_size(bag, 1)
-		bags_inv:set_size(bag, 1)
-		bags_inv:set_stack(bag,1,player_inv:get_stack(bag,1))
 	end
 
 	armor.player_hp[name] = 0
@@ -551,16 +422,10 @@ races.register_init_callback(function(name, race, gender, skin, texture, face)
 		gravity = 1,
 		fire = 0,
 	}
-	armor.textures[name] = {
-		armor = "lottarmor_trans.png",
-		preview = "character_preview.png"
-	}
+
 	for i=1, ARMOR_INIT_TIMES do
 		minetest.after(ARMOR_INIT_DELAY * i, function(player)
 			armor:set_player_armor(player)
-			if not inv_mod and not minetest.settings:get_bool("creative_mode") then
-				sfinv.invalidate_page(player, "inventory:main")
-			end
 		end, joined_player)
 	end
 	races.update_player(name, {race, gender}, skin)
@@ -590,6 +455,6 @@ races.register_update_callback(function(name, race, gender, skin, texture, face)
 	minetest.log("Updating player "..name..": "..race.." "..gender.." "..skin.." "..tostring(texture).." "..tostring(face))
 	multiskin[name].skin = texture
 	armor:set_player_armor(player)
-	sfinv.invalidate_page(player, "inventory:main")
 	multiskin:update_player_visuals(player)
+	armor:armor_changed(player)
 end)
